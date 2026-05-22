@@ -3,11 +3,13 @@ import axios from 'axios';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'DONE';
 
 export interface Task {
-  id: string;
+  _id: string;
   title: string;
   description?: string;
   status: TaskStatus;
   createdAt: string;
+  updatedAt: string;
+  __v?: number;
 }
 
 export interface CreateTaskPayload {
@@ -35,13 +37,15 @@ export const taskApi = {
     return response.data;
   },
 
-  updateTask: async (id: string, payload: UpdateTaskPayload) => {
-    const response = await axios.patch<Task>(`${API_URL}/${id}`, payload);
+  updateTask: async (_id: string, payload: UpdateTaskPayload) => {
+    const response = await axios.patch<Task>(`${API_URL}/${_id}`, payload);
     return response.data;
   },
 
-  deleteTask: async (id: string) => {
-    const response = await axios.delete<{ message: string }>(`${API_URL}/${id}`);
+  deleteTask: async (_id: string) => {
+    const response = await axios.delete<{ message: string }>(
+      `${API_URL}/${_id}`,
+    );
     return response.data;
   },
 };

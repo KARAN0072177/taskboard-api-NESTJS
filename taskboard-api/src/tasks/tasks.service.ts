@@ -1,20 +1,23 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
-import { Task } from './task.entity';
-import { TaskStatus } from './task-status.enum';
+import { Task, TaskDocument } from './schemas/task.schema';
 
 @Injectable()
 export class TasksService {
-  private tasks: Task[] = [];
+  constructor(
+    @InjectModel(Task.name)
+    private readonly taskModel: Model<TaskDocument>,
+  ) {}
 
-  findAll(): Task[] {
-    return this.tasks;
+  async findAll(): Promise<TaskDocument[]> {
+    return this.taskModel.find().sort({ createdAt: -1 }).exec();
   }
 
-  findOne(id: string): Task {
-    const task = this.tasks.find((task) => task.id === id);
+  async findOne(id: string): Promise<TaskDocument> {
+    const task = await this.taskModel.findById(id).exec();
 
     if (!task) {
       throw new NotFoundException(`Task with id ${id} not found`);
@@ -23,32 +26,32 @@ export class TasksService {
     return task;
   }
 
-  create(createTaskDto: CreateTaskDto): Task {
-    const task: Task = {
-      id: randomUUID(),
-      title: createTaskDto.title,
-      description: createTaskDto.description,
-      status: createTaskDto.status ?? TaskStatus.TODO,
-      createdAt: new Date(),
-    };
+  async create(createTaskDto: CreateTaskDto): Promise<TaskDocument> {
+    const task = new this.taskModel(createTaskDto);
+    return task.save();
+  }
 
-    this.tasks.push(task);
+  async update(id: string, updateTaskDto: UpdateTaskDto): Promise<TaskDocument> {
+    const task = await this.taskModel
+      .findByIdAndUpdate(id, updateTaskDto, {
+        new: true,
+        runValidators: true,
+      })
+      .exec();
+
+    if (!task) {
+      throw new NotFoundException(`Task with id ${id} not found`);
+    }
 
     return task;
   }
 
-  update(id: string, updateTaskDto: UpdateTaskDto): Task {
-    const task = this.findOne(id);
+  async remove(id: string): Promise<{ message: string }> {
+    const task = await this.taskModel.findByIdAndDelete(id).exec();
 
-    Object.assign(task, updateTaskDto);
-
-    return task;
-  }
-
-  remove(id: string): { message: string } {
-    const task = this.findOne(id);
-
-    this.tasks = this.tasks.filter((item) => item.id !== task.id);
+    if (!task) {
+      throw new NotFoundException(`Task with id ${id} not found`);
+    }
 
     return {
       message: 'Task deleted successfully',

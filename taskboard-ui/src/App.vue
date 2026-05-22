@@ -56,23 +56,25 @@ const updateStatus = async (task: Task, newStatus: TaskStatus) => {
   try {
     error.value = '';
 
-    const updatedTask = await taskApi.updateTask(task.id, {
+    const updatedTask = await taskApi.updateTask(task._id, {
       status: newStatus,
     });
 
     tasks.value = tasks.value.map((item) =>
-      item.id === task.id ? updatedTask : item,
+      item._id === task._id ? updatedTask : item,
     );
   } catch {
     error.value = 'Failed to update task';
   }
 };
 
-const deleteTask = async (id: string) => {
+const deleteTask = async (_id: string) => {
   try {
     error.value = '';
-    await taskApi.deleteTask(id);
-    tasks.value = tasks.value.filter((task) => task.id !== id);
+
+    await taskApi.deleteTask(_id);
+
+    tasks.value = tasks.value.filter((task) => task._id !== _id);
   } catch {
     error.value = 'Failed to delete task';
   }
@@ -107,12 +109,16 @@ onMounted(fetchTasks);
           </div>
 
           <div class="statCard">
-            <span>{{ tasks.filter((task) => task.status === 'TODO').length }}</span>
+            <span>
+              {{ tasks.filter((task) => task.status === 'TODO').length }}
+            </span>
             <p>To Do</p>
           </div>
 
           <div class="statCard">
-            <span>{{ tasks.filter((task) => task.status === 'DONE').length }}</span>
+            <span>
+              {{ tasks.filter((task) => task.status === 'DONE').length }}
+            </span>
             <p>Done</p>
           </div>
         </div>
@@ -190,7 +196,7 @@ onMounted(fetchTasks);
         <div v-else class="taskGrid">
           <article
             v-for="task in tasks"
-            :key="task.id"
+            :key="task._id"
             class="taskCard"
           >
             <div class="taskTop">
@@ -201,7 +207,7 @@ onMounted(fetchTasks);
               <button
                 class="iconBtn"
                 type="button"
-                @click="deleteTask(task.id)"
+                @click="deleteTask(task._id)"
                 title="Delete task"
               >
                 ×
