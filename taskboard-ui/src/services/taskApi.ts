@@ -24,7 +24,9 @@ export interface UpdateTaskPayload {
   status?: TaskStatus;
 }
 
-const API_URL = 'http://localhost:3000/tasks';
+const API_BASE_URL = import.meta.env.VITE_API_URL;
+
+const API_URL = `${API_BASE_URL}/tasks`;
 
 export const taskApi = {
   getTasks: async () => {
