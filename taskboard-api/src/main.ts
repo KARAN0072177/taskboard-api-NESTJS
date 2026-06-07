@@ -10,7 +10,10 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') ?? 3000;
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: [
+      'http://localhost:5173',
+      'https://YOUR_FRONTEND_RENDER_URL.onrender.com',
+    ],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     credentials: true,
   });
@@ -25,6 +28,6 @@ async function bootstrap() {
 
   await app.listen(port);
 
-  console.log(`Server running on http://localhost:${port}`);
+  console.log(`Server running on port ${port}`);
 }
-bootstrap();
+void bootstrap();
