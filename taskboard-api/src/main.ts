@@ -10,10 +10,7 @@ async function bootstrap() {
   const port = configService.get<number>('PORT') ?? 3000;
 
   app.enableCors({
-    origin: [
-      'http://localhost:5173',
-      'https://YOUR_FRONTEND_RENDER_URL.onrender.com',
-    ],
+    origin: ['http://localhost:5173', 'https://taskforge-8jmb.onrender.com'],
     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
     credentials: true,
   });
